@@ -75,16 +75,16 @@ def evaluate_one_task_success(
             "camera_widths": cfg.data.img_w,
         }
 
-        env_num = min(cfg.eval.num_procs, cfg.eval.n_eval) if cfg.eval.use_mp else 1
-        eval_loop_num = (cfg.eval.n_eval + env_num - 1) // env_num
-
         # Try to handle the frame buffer issue
         env_creation = False
 
         count = 0
+        print(f"[DEBUG] Start loop to create env.")
         while not env_creation and count < 5:
             try:
+                print(f"[DEBUG] try to create env...")
                 if env_num == 1:
+                    print(f"[DEBUG] env_num==1, create DummyVectorEnv")
                     env = DummyVectorEnv(
                         [lambda: OffScreenRenderEnv(**env_args) for _ in range(env_num)]
                     )
@@ -93,7 +93,9 @@ def evaluate_one_task_success(
                         [lambda: OffScreenRenderEnv(**env_args) for _ in range(env_num)]
                     )
                 env_creation = True
-            except:
+                print(f"[DEBUG] Success on creating env.")
+            except Exception as e:
+                print(f"[error] At generating dummy env: {e}")
                 time.sleep(5)
                 count += 1
         if count >= 5:
@@ -107,6 +109,7 @@ def evaluate_one_task_success(
         init_states = torch.load(init_states_path)
         num_success = 0
         for i in range(eval_loop_num):
+            print(f"[INFO] evaluate {i}")
             env.reset()
             indices = np.arange(i * env_num, (i + 1) * env_num) % init_states.shape[0]
             init_states_ = init_states[indices]

@@ -267,6 +267,8 @@ def main(hydra_cfg):
 
 if __name__ == "__main__":
     # Set the multiprocessing start method to 'spawn'
-    if multiprocessing.get_start_method(allow_none=True) != "spawn":  
-        multiprocessing.set_start_method("spawn", force=True)
+    # if multiprocessing.get_start_method(allow_none=True) != "spawn":  
+    #     multiprocessing.set_start_method("spawn", force=True)
+    if multiprocessing.get_start_method(allow_none=True) != "fork":  
+        multiprocessing.set_start_method("fork", force=True)
     main()

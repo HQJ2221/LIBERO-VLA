@@ -1,0 +1,34 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - data: default
+  - policy: bc_action_expert
+  - train: default
+  - eval: default
+  - lifelong: skill_library
+  - test: null
+
+seed: 10000
+use_wandb: false
+wandb_project: "lifelong learning"
+wandb_entity: "libero-vla"
+run_name: null # use default name
+folder: null # use default path
+bddl_folder: null # use default path
+init_states_folder: null # use default path
+load_previous_model: false
+device: "cuda"
+task_embedding_format: "bert"
+task_embedding_one_hot_offset: 1
+pretrain: false
+pretrain_model_path: ""
+benchmark_name: "LIBERO_SPATIAL"
+
+pretrain_cluster: true
+cluster_model_path: "/data/models/libero/cluster_model.pth" 
+num_clusters: 10
+hyper_dim: 256
+cluster_epochs: 200
+cluster_steps_per_epoch: 5
+cluster_lr: 0.01

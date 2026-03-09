@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+import torch
 import robomimic.utils.file_utils as FileUtils
 import robomimic.utils.obs_utils as ObsUtils
 from PIL import Image
@@ -137,3 +138,38 @@ class TruncatedSequenceDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.sequence_dataset.__getitem__(idx)
+
+
+class SkillLabeledVLDataset(SequenceVLDataset):
+    """
+    Add on SequenceVLDataset:
+    - cluster_id:     int / torch.long   (整个 task 属于哪个 cluster)
+    - skill_hyper_param:  (可选) tensor (seq_len,) 或 (seq_len, hyper_dim) 用于给 PolicyDecorator 的提示向量
+    """
+    def __init__(self, sequence_dataset, task_emb, cluster_id: int, skill_hyper_params=None):
+        super().__init__(sequence_dataset, task_emb)
+
+        self.cluster_id = cluster_id
+        self.skill_hyper_params = skill_hyper_params
+        # Optional
+        if skill_hyper_params is not None:
+            if not isinstance(skill_hyper_params, torch.Tensor):
+                skill_hyper_params = torch.tensor(skill_hyper_params, dtype=torch.float32)
+            # assert len(skill_hyper_params) == len(sequence_dataset), \
+            #     f"skill_hyper_params length {len(skill_hyper_params)} != dataset length {len(sequence_dataset)}"
+            self.skill_hyper_params = skill_hyper_params
+
+    def __len__(self):
+        return len(self.sequence_dataset)
+
+    def __getitem__(self, idx):
+        # 1. get original data (with task_emb)
+        return_dict = super().__getitem__(idx)
+
+        # 2. add on cluster_id and skill_hyper_param
+        return_dict["cluster_id"] = torch.tensor(self.cluster_id, dtype=torch.long)
+
+        if self.skill_hyper_params is not None:
+            return_dict["skill_hyper_param"] = self.skill_hyper_params
+
+        return return_dict

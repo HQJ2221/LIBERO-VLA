@@ -1,0 +1,11 @@
+network: DiffusionHead
+
+network_kwargs:
+    input_size: 256
+    output_size: 256
+    hidden_size: 512
+    num_layers: 2
+    low_eval_noise: false
+
+loss_kwargs:
+    loss_coef: 1.0
